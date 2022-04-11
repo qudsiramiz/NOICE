@@ -10,7 +10,6 @@ from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import scipy.interpolate as interpolate
 
-
 ##### Import of data
 # Data location is just a folder on my computer
 RootPath = '/Users/emilatz/Dropbox/IDL_Lib/NICER_Cusp/NICER_obs_orbit/'
