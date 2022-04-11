@@ -207,3 +207,4 @@ def read_orbit_data(
     plt.close("all")
 
     print("Doin Science Yo!")
+    return axs

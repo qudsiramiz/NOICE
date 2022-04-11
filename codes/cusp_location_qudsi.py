@@ -1,7 +1,6 @@
 import datetime
 import itertools
 import multiprocessing as mp
-import sched
 import sys
 import time
 import importlib
@@ -9,8 +8,6 @@ import importlib
 import geopack.geopack as gp
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from matplotlib.patches import Circle, Wedge
 
 import get_sw_params as get_sw_params
 import figure_setup as figure_setup
@@ -150,7 +147,5 @@ def line_trace(
 
     return ax
 
-#s.enter(0, 1, line_trace, (s,))
-#s.run()
 
 axs = line_trace()
