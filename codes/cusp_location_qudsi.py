@@ -40,7 +40,7 @@ def trace_lines(*args):
     #sw_params = get_sw_params(trange = [param_time_str_strt, param_time_str_end])
 
     sw_params = {}
-    sw_params["p_dyn"] = 1e-5
+    sw_params["p_dyn"] = 2
     sw_params["by_gsm"] = -3
     sw_params["bz_gsm"] = -2
 
@@ -58,9 +58,9 @@ def trace_lines(*args):
     x_gsm = np.sin(theta) * np.cos(phi)
     y_gsm = np.sin(theta) * np.sin(phi)
     z_gsm = np.cos(theta)
-    _, _, _, xx1, yy1, zz1 = gp.trace(x_gsm, y_gsm, z_gsm, dir=-1, rlim=30, r0=.99999, parmod=param,
+    _, _, _, xx1, yy1, zz1 = gp.trace(x_gsm, y_gsm, z_gsm, dir=-1, rlim=2, r0=.99999, parmod=param,
                                       exname='t96', inname='igrf', maxloop=10000)
-    _, _, _, xx2, yy2, zz2 = gp.trace(x_gsm, y_gsm, z_gsm, dir=1, rlim=30, r0=.99999, parmod=param,
+    _, _, _, xx2, yy2, zz2 = gp.trace(x_gsm, y_gsm, z_gsm, dir=1, rlim=2, r0=.99999, parmod=param,
                                       exname='t96', inname='igrf', maxloop=10000)
     return xx1, yy1, zz1, xx2, yy2, zz2, ps
 
@@ -75,12 +75,12 @@ def line_trace(
     """
 
     try:
-
+    #for xxx in range(1):
         if obs_time is None:
             obs_time = 1640115443.165065
 
         if theta_arr is None:
-            theta_arr = np.linspace(0, np.pi, 5)
+            theta_arr = np.linspace(0, np.pi, 2)
 
         if phi_arr is None:
             phi_arr = np.array([0])
@@ -93,8 +93,8 @@ def line_trace(
         except:
             pass
 
-        theta_arr = np.linspace(0, 2 * np.pi, 5)
-        phi_arr = np.array([0])  # np.linspace(-11 * np.pi/180, 11*np.pi/180, 2)
+        theta_arr = np.linspace(0, np.pi/4, 10)
+        phi_arr = np.linspace( 0, 2 * np.pi, 25)
 
         p = mp.Pool()
         input = ((i, j) for i, j in itertools.product(theta_arr, phi_arr))
@@ -102,50 +102,70 @@ def line_trace(
         p.close()
         p.join()
 
-        ax=figure_setup.setup_fig()
+        xx1 = []
+        yy1 = []
+        zz1 = []
+        xx2 = []
+        yy2 = []
+        zz2 = []
         for r in res:
-            xx1 = r[0]
-            yy1 = r[1]
-            zz1 = r[2]
-            xx2 = r[3]
-            yy2 = r[4]
-            zz2 = r[5]
+            xx1.append(r[0])
+            yy1.append(r[1])
+            zz1.append(r[2])
+            xx2.append(r[3])
+            yy2.append(r[4])
+            zz2.append(r[5])
             ps = r[6]
-            ax.plot(xx1, yy1, zz1)
-            ax.plot(xx2, yy2, zz2)
-
-        figure_time = f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}"
-
-        ax.text(0.01, 0.01, f'Figure plotted on {figure_time[0:10]} at {figure_time[11:]} UTC',
-                ha='left', va='bottom', transform=ax.transAxes, fontsize=12)
-        ax.text(0.99, 0.99, f'Real-time T-96 model', ha='right', va='top', transform=ax.transAxes, 
-                fontsize=12)
-        ax.text(0.01, 0.99, f'Dipole Tilt: {np.round(np.rad2deg(ps), 2)}$^\circ$', 
-                ha='left', va='top', transform=ax.transAxes,
-                fontsize=12)
-        fig_name = f"../figures/Earths_magnetic_field.png"
-        fig_name_gdr = f"../figures/Earths_magnetic_field.png"
-
-        t = int(datetime.datetime.today().replace(tzinfo=datetime.timezone.utc).timestamp())
-        fig_name_hist = f"../figures/Earthsmagnetic_field_{t}.png"
-
-        plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format='png', dpi=300)
-        #plt.savefig(fig_name_hist, bbox_inches='tight', pad_inches=0.05, format='png', dpi=300)
-        #plt.savefig(fig_name_gdr, bbox_inches='tight', pad_inches=0.05, format='png', dpi=300)
-        #plt.close("all")
-
-        print(f"Code execution finished at (UTC):" +
-              f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}\n")
-        print(f"Figure saved at (UTC):{figure_time}\n")
-        print(f"Waiting for about 15 minutes before running the code again.\n")
     except:
         print("Error:", sys.exc_info()[0])
         print(f"Code execution finished at (UTC):" +
               f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}\n")
-        print(f"Waiting for about 15 minutes before running the code again.\n")
+    #    print(f"Waiting for about 15 minutes before running the code again.\n")
         #s.enter(1000, 1, line_trace, (sd,))
+
+    print(np.shape(xx1))
+    return xx1, yy1, zz1, xx2, yy2, zz2, ps
+
+def plot_figure(xx1, yy1, zz1, xx2, yy2, zz2, ps):
+
+    ax=figure_setup.setup_fig()
+    #ax = plt.axes(projection='3d')
+    #for xxx1, yyy1, zzz1 in zip(xx1, yy1, zz1):
+    #    ax.plot(xxx1, yyy1, zzz1, '-', color='k', linewidth=1, alpha=0.7, zorder=2)
+    for xxx2, yyy2, zzz2 in zip(xx2, yy2, zz2):
+        ax.plot(xxx2, yyy2, zzz2, '-', color='r', linewidth=1, alpha=0.7, zorder=2)
+
+    figure_time = f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}"
+
+    ax.text(0, 1, 32, f'Figure plotted on {figure_time[0:10]} at {figure_time[11:]} UTC',
+            ha='left', va='bottom', transform=ax.transAxes, fontsize=12)
+    #ax.text(0.99, 0.99, 0.99, f'Real-time T-96 model', ha='right', va='top',
+    # transform=ax.transAxes, fontsize=12)
+    ax.text(0.01, 0.00, 0.99, f'Dipole Tilt: {np.round(np.rad2deg(ps), 2)}$^\circ$', 
+            ha='left', va='top', transform=ax.transAxes,
+            fontsize=12)
+
+    t = int(datetime.datetime.today().replace(tzinfo=datetime.timezone.utc).timestamp())
+    fig_name = f"../figures/Earthsmagnetic_field_2re.png"
+
+    # Change the view angle to see the Earth's magnetic field
+    ax.view_init(elev=15, azim=90)
+    plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format='png', dpi=300)
+    #plt.close("all")
+    plt.show()
+
+    #for ii in range(0,360,5):
+    #    ax.view_init(elev=30., azim=ii)
+    #    plt.savefig("../figures/view_point/movie%d.png" % ii, bbox_inches='tight',
+    #                pad_inches=0.05, format='png', dpi=300)
+    #plt.close("all")
+    print(f"Code execution finished at (UTC):" +
+          f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}\n")
+    print(f"Figure saved at (UTC):{figure_time}\n")
 
     return ax
 
 
-axs = line_trace()
+xx1,yy1, zz1, xx2, yy2, zz2, ps = line_trace()
+
+ax = plot_figure(xx1, yy1, zz1, xx2, yy2, zz2, ps)
